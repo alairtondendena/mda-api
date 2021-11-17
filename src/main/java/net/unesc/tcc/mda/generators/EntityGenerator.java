@@ -1,23 +1,27 @@
 package net.unesc.tcc.mda.generators;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.common.base.CaseFormat;
 import com.squareup.javapoet.AnnotationSpec;
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.FieldSpec.Builder;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeSpec;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import io.swagger.annotations.ApiModelProperty;
 import java.util.LinkedHashSet;
+import java.util.Objects;
 import java.util.Set;
 import javax.lang.model.element.Modifier;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import lombok.Data;
 import net.unesc.tcc.mda.core.MdaMetaModel;
 import net.unesc.tcc.mda.core.MdaModel;
@@ -26,7 +30,7 @@ import org.apache.commons.lang.StringUtils;
 public class EntityGenerator implements MdaGenerator {
 
 	@Override
-	public void generate(MdaModel model) {
+	public JavaFile generate(String packageName, MdaModel model) {
 		String entity = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, model.getName());
 
 		Set<FieldSpec> fields = new LinkedHashSet<>();
@@ -37,12 +41,27 @@ public class EntityGenerator implements MdaGenerator {
 			if (metaModel.isPrimaryKey()) {
 				fieldBuilder.addAnnotation(AnnotationSpec.builder(Id.class).build());
 				fieldBuilder.addAnnotation(AnnotationSpec.builder(GeneratedValue.class)
-					.addMember("strategy", "$L", GenerationType.IDENTITY)
+					.addMember("strategy", CodeBlock.builder().add("$T.IDENTITY", ClassName.bestGuess("javax.persistence.GenerationType")).build())
 					.build());
 			}
-			fields.add(fieldBuilder.addAnnotation(
-				AnnotationSpec.builder(Column.class).addMember("name", "$S", metaModel.getName()).build()
-			).build());
+			AnnotationSpec.Builder apiModelProperty = AnnotationSpec.builder(ApiModelProperty.class);
+			if (Objects.nonNull(metaModel.getDescription())) {
+				apiModelProperty.addMember("name", "$S", metaModel.getDescription());
+			}
+			if (!metaModel.isNullable() && !metaModel.isPrimaryKey()) {
+				fieldBuilder.addAnnotation(metaModel.getDataType().getType().equals(String.class) ? NotBlank.class : NotNull.class);
+				apiModelProperty.addMember("required", "$L", !metaModel.isNullable());
+			}
+			fieldBuilder.addAnnotation(apiModelProperty.build()).build();
+			AnnotationSpec.Builder column = AnnotationSpec.builder(Column.class).addMember("name", "$S", metaModel.getId());
+			if (Objects.nonNull(metaModel.getLength()) && !metaModel.isPrimaryKey()) {
+				if (metaModel.getDataType().getType().equals(String.class)) {
+					fieldBuilder.addAnnotation(AnnotationSpec.builder(Size.class).addMember("max", "$L", metaModel.getLength()).build());
+				}
+				column.addMember("length", "$L", metaModel.getLength());
+			}
+			fieldBuilder.addAnnotation(column.build());
+			fields.add(fieldBuilder.build());
 		}
 
 		TypeSpec typeSpec = TypeSpec.classBuilder(StringUtils.capitalize(entity))
@@ -50,28 +69,14 @@ public class EntityGenerator implements MdaGenerator {
 			.addAnnotation(Data.class)
 			.addAnnotation(Entity.class)
 			.addAnnotation(AnnotationSpec.builder(Table.class)
-				.addMember("name", "$S", model.getName())
+				.addMember("name", "$S", model.getId())
+				.build())
+			.addAnnotation(AnnotationSpec.builder(JsonIgnoreProperties.class)
+				.addMember("value", "{$S, $S}", "hibernateLazyInitializer", "handler")
 				.build())
 			.addFields(fields)
 			.build();
 
-		JavaFile javaFile = JavaFile.builder("com.exemple.demo.entities", typeSpec).build();
-
-		String path = "target" + File.separator + "generated-mda-projects" + File.separator + "teste" + File.separator + "demo" + File.separator + "src" +
-			File.separator + "main" + File.separator + "java" + File.separator + "com" + File.separator + "example" + File.separator + "demo" +
-			File.separator + "entities";
-
-		File directory = new File(path);
-		if (!directory.exists()){
-			directory.mkdir();
-		}
-
-		try {
-			FileWriter file = new FileWriter(new File(path + File.separator + StringUtils.capitalize(entity) + ".java"));
-			file.write(javaFile.toString());
-			file.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		return JavaFile.builder(packageName + ".entities", typeSpec).build();
 	}
 }

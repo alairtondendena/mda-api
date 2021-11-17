@@ -6,13 +6,11 @@ import net.unesc.tcc.mda.core.MdaAttributeTypes;
 import net.unesc.tcc.mda.core.MdaModel;
 
 @Getter
-public class MdaProjectResponse {
-	private String name;
+public class MdaModelResponse {
 	private Set<MdaModel> models;
 	private Set<MdaAttributeTypes> types;
 
-	public MdaProjectResponse(String name, Set<MdaModel> models, Set<MdaAttributeTypes> types) {
-		this.name = name;
+	public MdaModelResponse(Set<MdaModel> models, Set<MdaAttributeTypes> types) {
 		this.models = models;
 		this.types = types;
 	}

@@ -10,6 +10,9 @@ import net.unesc.tcc.mda.core.enums.DataType;
 public class MdaMetaModel {
 	@NotBlank
 	@ApiModelProperty(required = true)
+	private String id;
+	@NotBlank
+	@ApiModelProperty(required = true)
 	private String name;
 	private String columnDefault;
 	private boolean isPrimaryKey;
@@ -17,20 +20,20 @@ public class MdaMetaModel {
 	@NotNull
 	@ApiModelProperty(required = true)
 	private DataType dataType;
-	private Integer charLength;
-	private Integer numPrecision;
+	private Integer length;
 	private Integer numScale;
 	private String description;
 
-	public MdaMetaModel(String name, String columnDefault, boolean isPrimaryKey, boolean isNullable, DataType dataType, Integer charLength, Integer numPrecision,
-		Integer numScale, String description) {
+	public MdaMetaModel(String id, String name, String columnDefault, boolean isPrimaryKey, boolean isNullable, DataType dataType, Integer length,
+		Integer numScale,
+		String description) {
+		this.id = id;
 		this.name = name;
 		this.columnDefault = columnDefault;
 		this.isPrimaryKey = isPrimaryKey;
 		this.isNullable = isNullable;
 		this.dataType = dataType;
-		this.charLength = charLength;
-		this.numPrecision = numPrecision;
+		this.length = length;
 		this.numScale = numScale;
 		this.description = description;
 	}

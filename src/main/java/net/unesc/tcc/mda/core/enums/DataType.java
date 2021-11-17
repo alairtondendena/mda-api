@@ -1,9 +1,12 @@
 package net.unesc.tcc.mda.core.enums;
 
+import java.awt.Point;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public enum DataType {
 
     INT_2("int2", Integer.class),
@@ -12,14 +15,17 @@ public enum DataType {
     BIG_SERIAL("bigserial", Long.class),
     ENUM("enum", Enum.class),
     BOOLEAN("bool", Boolean.class),
+    DOUBLE("float8", Double.class),
     NUMERIC("numeric", Long.class),
     DECIMAL("numeric", BigDecimal.class),
     CHAR("bpchar", String.class),
     VARCHAR("varchar", String.class),
     TEXT("text", String.class),
+    JSON("json", String.class),
     TIME("time", LocalTime.class),
     TIMESTAMP("timestamp", LocalDate.class),
-    DATE("date", LocalDate.class);
+    DATE("date", LocalDate.class),
+    POINT("point", String.class);
 
     private final String value;
     private final Class type;
@@ -35,6 +41,7 @@ public enum DataType {
                 return dataType;
             }
         }
+        log.info(value);
         return null;
     }
 

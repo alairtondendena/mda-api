@@ -1,0 +1,27 @@
+version: "3"
+services:
+  postgres_db:
+    image: postgres:9.6
+    container_name: "postgres_db"
+    environment:
+      - POSTGRES_DB=db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - "./data/postgres:/var/lib/postgresql/data"
+    ports:
+      - 5432:5432
+
+  mysql_db:
+    image: mysql:5.7
+    command: --max_allowed_packet=32505856
+    container_name: "mysql_db"
+    environment:
+      - MYSQL_DATABASE=db
+      - MYSQL_USER=mysql
+      - MYSQL_PASSWORD=mysql
+      - MYSQL_ROOT_PASSWORD=root
+    volumes:
+      - './.mysql-data/db:/var/lib/mysql'
+    ports:
+      - 3306:3306

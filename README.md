@@ -19,7 +19,7 @@ Base de dados exemplo: https://github.com/alairtondendena/mda-api/blob/master/du
 Clone o projeto
 
 ```bash
-  git clone https://github.com/alairtondendena/mda-app.git
+  git clone https://github.com/alairtondendena/mda-api.git
 ```
 
 Vá para o diretório do projeto

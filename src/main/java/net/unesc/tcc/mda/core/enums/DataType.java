@@ -25,7 +25,8 @@ public enum DataType {
     TIME("time", LocalTime.class),
     TIMESTAMP("timestamp", LocalDate.class),
     DATE("date", LocalDate.class),
-    POINT("point", String.class);
+    POINT("point", String.class),
+    JSONB("jsonb", String.class);
 
     private final String value;
     private final Class type;

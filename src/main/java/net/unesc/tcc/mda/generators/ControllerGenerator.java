@@ -11,6 +11,7 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import java.util.Objects;
 import javax.lang.model.element.Modifier;
 import javax.validation.Valid;
 import net.unesc.tcc.mda.core.MdaMetaModel;
@@ -33,9 +34,12 @@ public class ControllerGenerator implements MdaGenerator {
 
 	@Override
 	public JavaFile generate(String packageName, MdaModel model) {
+		MdaMetaModel pkMetaModel = model.getAttributes().stream().filter(MdaMetaModel::isPrimaryKey).findFirst().orElse(null);
+		if (Objects.isNull(pkMetaModel)) {
+			return null;
+		}
 		String entity = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, model.getName());
 		String name = StringUtils.capitalize(entity) + "Controller";
-		MdaMetaModel pkMetaModel = model.getAttributes().stream().filter(MdaMetaModel::isPrimaryKey).findFirst().orElseThrow(RuntimeException::new);
 		String pkAttributeName = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, pkMetaModel.getName());
 		TypeSpec typeSpec = TypeSpec.classBuilder(name)
 			.addModifiers(Modifier.PUBLIC)

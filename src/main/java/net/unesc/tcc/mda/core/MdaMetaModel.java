@@ -16,7 +16,7 @@ public class MdaMetaModel {
 	private String name;
 	private String columnDefault;
 	private boolean isPrimaryKey;
-	private boolean isNullable;
+	private boolean isRequired;
 	@NotNull
 	@ApiModelProperty(required = true)
 	private DataType dataType;
@@ -24,14 +24,14 @@ public class MdaMetaModel {
 	private Integer numScale;
 	private String description;
 
-	public MdaMetaModel(String id, String name, String columnDefault, boolean isPrimaryKey, boolean isNullable, DataType dataType, Integer length,
+	public MdaMetaModel(String id, String name, String columnDefault, boolean isPrimaryKey, boolean isRequired, DataType dataType, Integer length,
 		Integer numScale,
 		String description) {
 		this.id = id;
 		this.name = name;
 		this.columnDefault = columnDefault;
 		this.isPrimaryKey = isPrimaryKey;
-		this.isNullable = isNullable;
+		this.isRequired = isRequired;
 		this.dataType = dataType;
 		this.length = length;
 		this.numScale = numScale;

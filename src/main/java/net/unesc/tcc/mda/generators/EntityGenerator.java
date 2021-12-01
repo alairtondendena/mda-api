@@ -31,8 +31,11 @@ public class EntityGenerator implements MdaGenerator {
 
 	@Override
 	public JavaFile generate(String packageName, MdaModel model) {
+		MdaMetaModel pkMetaModel = model.getAttributes().stream().filter(MdaMetaModel::isPrimaryKey).findFirst().orElse(null);
+		if (Objects.isNull(pkMetaModel)) {
+			return null;
+		}
 		String entity = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, model.getName());
-
 		Set<FieldSpec> fields = new LinkedHashSet<>();
 		for (MdaMetaModel metaModel : model.getAttributes()) {
 			Builder fieldBuilder = FieldSpec
@@ -48,9 +51,9 @@ public class EntityGenerator implements MdaGenerator {
 			if (Objects.nonNull(metaModel.getDescription())) {
 				apiModelProperty.addMember("name", "$S", metaModel.getDescription());
 			}
-			if (!metaModel.isNullable() && !metaModel.isPrimaryKey()) {
+			if (metaModel.isRequired() && !metaModel.isPrimaryKey()) {
 				fieldBuilder.addAnnotation(metaModel.getDataType().getType().equals(String.class) ? NotBlank.class : NotNull.class);
-				apiModelProperty.addMember("required", "$L", !metaModel.isNullable());
+				apiModelProperty.addMember("required", "$L", metaModel.isRequired());
 			}
 			fieldBuilder.addAnnotation(apiModelProperty.build()).build();
 			AnnotationSpec.Builder column = AnnotationSpec.builder(Column.class).addMember("name", "$S", metaModel.getId());

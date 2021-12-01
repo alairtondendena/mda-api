@@ -97,7 +97,7 @@ public class MdaController {
 						rsColumns.getString("column_name"),
 						rsColumns.getString("column_def"),
 						primaryKeys.contains(rsColumns.getString("column_name")),
-						rsColumns.getString("is_nullable").equals(YesNo.YES.getValue()),
+						rsColumns.getString("is_nullable").equals(YesNo.NO.getValue()),
 						DataType.of(rsColumns.getString("type_name")),
 						rsColumns.getInt("column_size"),
 						rsColumns.getInt("decimal_digits"),
@@ -228,6 +228,9 @@ public class MdaController {
 			for (MdaGenerator generator : generators) {
 				long gStartTime = System.currentTimeMillis();
 				JavaFile javaFile = generator.generate(request.getPackageName(), model);
+				if (Objects.isNull(javaFile)) {
+					continue;
+				}
 				String path = generatedProject + File.separator + "src" + File.separator + "main" + File.separator + "java" + File.separator +
 					javaFile.packageName.replace(".", File.separator);
 
